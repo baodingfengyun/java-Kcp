@@ -23,3 +23,9 @@
 hs_err_pid*
 
 .idea*
+
+# target
+kcp-base/target/
+kcp-example/target/
+kcp-fec/target/
+kcp-lockStepSynchronization/target/
