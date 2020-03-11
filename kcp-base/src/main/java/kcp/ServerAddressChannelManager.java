@@ -12,6 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * 2019/10/17.
  */
 public class ServerAddressChannelManager implements IChannelManager {
+    /**
+     * 地址与kcp对照表
+     */
     private Map<SocketAddress,Ukcp> ukcpMap = new ConcurrentHashMap<>();
 
     @Override

@@ -16,15 +16,23 @@ import java.util.List;
 import java.util.Vector;
 
 /**
+ * 基于netty实现的KcpServer
+ * <p>
  * Created by JinMiao
  * 2018/9/20.
  */
 public class KcpServer {
+    /**
+     * disruptor线程池
+     */
     private DisruptorExecutorPool disruptorExecutorPool;
 
     private Bootstrap bootstrap;
     private EventLoopGroup group;
-    private List<Channel> localAddresss = new Vector<>();
+    private List<Channel> localAddress = new Vector<>();
+    /**
+     * 服务器连接管理
+     */
     private IChannelManager channelManager;
 
 
@@ -37,26 +45,27 @@ public class KcpServer {
     }
 
 
-    public void init(DisruptorExecutorPool disruptorExecutorPool, KcpListener kcpListener, ChannelConfig channelConfig, int... ports) {
+    public void init(DisruptorExecutorPool disruptorExecutorPool, KcpListener kcpListener, ChannelConfig channelConfig,
+                     int... ports) {
         //自动获取conv时 conv应该为0
         if (channelConfig.isAutoSetConv()) {
             channelConfig.setConv(0);
         }
 
-        if(channelConfig.isUseConvChannel()){
+        if (channelConfig.isUseConvChannel()) {
             int convIndex = 0;
-            if(channelConfig.KcpTag){
-                convIndex+=Ukcp.KCP_TAG;
+            if (channelConfig.KcpTag) {
+                convIndex += Ukcp.KCP_TAG;
             }
-            if(channelConfig.getFecDataShardCount()!=0&&channelConfig.getFecParityShardCount()!=0){
-                convIndex+= Fec.fecHeaderSizePlus2;
+            if (channelConfig.getFecDataShardCount() != 0 && channelConfig.getFecParityShardCount() != 0) {
+                convIndex += Fec.fecHeaderSizePlus2;
             }
             channelManager = new ConvChannelManager(convIndex);
-        }else{
+        } else {
             channelManager = new ServerAddressChannelManager();
         }
 
-
+        // 操作系统是否支持epoll
         boolean epoll = Epoll.isAvailable();
         this.disruptorExecutorPool = disruptorExecutorPool;
         bootstrap = new Bootstrap();
@@ -75,9 +84,10 @@ public class KcpServer {
         bootstrap.handler(new ChannelInitializer<Channel>() {
             @Override
             protected void initChannel(Channel ch) {
-                ServerChannelHandler serverChannelHandler = new ServerChannelHandler(channelManager, channelConfig, disruptorExecutorPool, kcpListener);
+                ServerChannelHandler serverChannelHandler = new ServerChannelHandler(
+                        channelManager, channelConfig, disruptorExecutorPool, kcpListener);
                 ChannelPipeline cp = ch.pipeline();
-                if(channelConfig.isCrc32Check()){
+                if (channelConfig.isCrc32Check()) {
                     Crc32Encode crc32Encode = new Crc32Encode();
                     Crc32Decode crc32Decode = new Crc32Decode();
                     //这里的crc32放在eventloop网络线程处理的，以后内核有丢包可以优化到单独的一个线程处理
@@ -95,7 +105,7 @@ public class KcpServer {
             for (int i = 0; i < bindTimes; i++) {
                 ChannelFuture channelFuture = bootstrap.bind(port);
                 Channel channel = channelFuture.channel();
-                localAddresss.add(channel);
+                localAddress.add(channel);
             }
         }
 
@@ -103,11 +113,11 @@ public class KcpServer {
     }
 
     public void stop() {
-        localAddresss.forEach(
+        localAddress.forEach(
                 channel -> channel.close()
         );
-        channelManager.getAll().forEach(ukcp ->
-                ukcp.notifyCloseEvent());
+        channelManager.getAll().forEach(
+                ukcp -> ukcp.notifyCloseEvent());
         if (disruptorExecutorPool != null) {
             disruptorExecutorPool.stop();
         }

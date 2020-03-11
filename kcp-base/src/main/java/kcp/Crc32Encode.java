@@ -22,13 +22,13 @@ public class Crc32Encode extends ChannelOutboundHandlerAdapter {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         DatagramPacket datagramPacket = (DatagramPacket) msg;
         ByteBuf data = datagramPacket.content();
-        ByteBuffer byteBuffer = data.nioBuffer(0,data.readableBytes());
+        ByteBuffer byteBuffer = data.nioBuffer(0, data.readableBytes());
         crc32.reset();
         crc32.update(byteBuffer);
         long checksum = crc32.getValue();
         ByteBuf headByteBuf = ctx.alloc().ioBuffer(4);
         headByteBuf.writeIntLE((int) checksum);
-        ByteBuf newByteBuf = Unpooled.wrappedBuffer(headByteBuf,data);
+        ByteBuf newByteBuf = Unpooled.wrappedBuffer(headByteBuf, data);
         datagramPacket = datagramPacket.replace(newByteBuf);
         ctx.write(datagramPacket, promise);
     }

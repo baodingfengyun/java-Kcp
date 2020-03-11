@@ -16,7 +16,7 @@ public class KcpPingPongExampleClient implements KcpListener {
 
     public static void main(String[] args) {
         ChannelConfig channelConfig = new ChannelConfig();
-        channelConfig.nodelay(true,40,2,true);
+        channelConfig.nodelay(true, 40, 2, true);
         channelConfig.setSndwnd(1024);
         channelConfig.setRcvwnd(1024);
         channelConfig.setMtu(1400);
@@ -27,12 +27,16 @@ public class KcpPingPongExampleClient implements KcpListener {
         //channelConfig.setTimeoutMillis(10000);
 
         KcpClient kcpClient = new KcpClient();
-        kcpClient.init(Runtime.getRuntime().availableProcessors(),channelConfig);
+        int workers = Runtime.getRuntime().availableProcessors();
+        kcpClient.init(workers, channelConfig);
 
-        KcpPingPongExampleClient kcpClientRttExample = new KcpPingPongExampleClient();
-        kcpClient.connect(new InetSocketAddress("127.0.0.1", 10001), channelConfig, kcpClientRttExample);
+        KcpPingPongExampleClient kcpPingPongClient = new KcpPingPongExampleClient();
+        String ip = "127.0.0.1";
+        int port = 10001;
+        kcpClient.connect(new InetSocketAddress(ip, port), channelConfig, kcpPingPongClient);
     }
-    int i =0;
+
+    int i = 0;
 
     @Override
     public void onConnected(Ukcp ukcp) {
@@ -45,10 +49,11 @@ public class KcpPingPongExampleClient implements KcpListener {
             byteBuf.release();
         }
     }
-    int j =0;
+
+    int j = 0;
 
     @Override
-    public void handleReceive(ByteBuf byteBuf, Ukcp ukcp,int protocolType) {
+    public void handleReceive(ByteBuf byteBuf, Ukcp ukcp, int protocolType) {
         ukcp.writeOrderedReliableMessage(byteBuf);
         int id = byteBuf.getInt(0);
         //if(j-id%10!=0){
@@ -56,9 +61,9 @@ public class KcpPingPongExampleClient implements KcpListener {
         //}
 
         j++;
-        if(j%100000==0){
+        if (j % 100000 == 0) {
             System.out.println(Snmp.snmp.toString());
-            System.out.println("收到了 返回回去"+j);
+            System.out.println("收到了 返回回去" + j);
         }
     }
 
@@ -69,7 +74,7 @@ public class KcpPingPongExampleClient implements KcpListener {
 
     @Override
     public void handleClose(Ukcp kcp) {
-        System.out.println("连接断开了");
+        System.out.println(kcp + " 连接断开了");
     }
 
 

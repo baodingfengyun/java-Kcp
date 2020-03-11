@@ -14,24 +14,29 @@ import java.util.concurrent.ConcurrentHashMap;
  * 2019/10/17.
  */
 public class ConvChannelManager implements IChannelManager {
-
+    /**
+     * 会话id偏移,conv自包含在数据中
+     */
     private int convIndex;
+    /**
+     * 会话id -> kcp 对照表
+     */
+    private Map<Integer, Ukcp> ukcpMap = new ConcurrentHashMap<>();
 
     public ConvChannelManager(int convIndex) {
         this.convIndex = convIndex;
     }
 
-    private Map<Integer,Ukcp> ukcpMap = new ConcurrentHashMap<>();
     @Override
     public Ukcp get(DatagramPacket msg) {
         ByteBuf byteBuf = msg.content();
-        int conv =byteBuf.getInt(byteBuf.readerIndex()+convIndex);
+        int conv = byteBuf.getInt(byteBuf.readerIndex() + convIndex);
         return ukcpMap.get(conv);
     }
 
     @Override
     public void New(SocketAddress socketAddress, Ukcp ukcp) {
-        ukcpMap.put(ukcp.getConv(),ukcp);
+        ukcpMap.put(ukcp.getConv(), ukcp);
     }
 
     @Override

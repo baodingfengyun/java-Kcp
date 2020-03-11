@@ -8,9 +8,9 @@ import io.netty.buffer.ByteBuf;
  */
 public interface KcpListener {
 
-
     /**
      * 连接之后
+     *
      * @param ukcp
      */
     void onConnected(Ukcp ukcp);
@@ -21,13 +21,12 @@ public interface KcpListener {
      * @param byteBuf the data
      * @param ukcp
      */
-    void handleReceive(ByteBuf byteBuf, Ukcp ukcp,int protocolType);
+    void handleReceive(ByteBuf byteBuf, Ukcp ukcp, int protocolType);
 
     /**
-     *
      * kcp异常，之后此kcp就会被关闭
      *
-     * @param ex 异常
+     * @param ex   异常
      * @param ukcp 发生异常的kcp，null表示非kcp错误
      */
     void handleException(Throwable ex, Ukcp ukcp);

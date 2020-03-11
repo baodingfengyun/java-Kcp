@@ -5,11 +5,14 @@ import io.netty.channel.Channel;
 import java.net.InetSocketAddress;
 
 /**
+ * 一个连接对象:包括channel,远端地址,本地地址,缓存
+ *
  * Created by JinMiao
  * 2018/11/2.
  */
 public class User {
 
+    /** 网络链接 */
     private Channel channel;
     private InetSocketAddress remoteAddress;
     private InetSocketAddress localAddress;

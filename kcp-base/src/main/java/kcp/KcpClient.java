@@ -20,26 +20,29 @@ import java.net.InetSocketAddress;
  * 2019-06-26.
  */
 public class KcpClient {
-
-
+    /**
+     * disruptor线程池
+     */
     private DisruptorExecutorPool disruptorExecutorPool;
+
     private Bootstrap bootstrap;
     private EventLoopGroup nioEventLoopGroup;
-    /**客户端的连接集合**/
+    /**
+     * 客户端连接管理
+     */
     private IChannelManager channelManager;
 
-
     public void init(ChannelConfig channelConfig) {
-        if(channelConfig.isUseConvChannel()){
+        if (channelConfig.isUseConvChannel()) {
             int convIndex = 0;
-            if(channelConfig.KcpTag){
-                convIndex+=Ukcp.KCP_TAG;
+            if (channelConfig.KcpTag) {
+                convIndex += Ukcp.KCP_TAG;
             }
-            if(channelConfig.getFecDataShardCount()!=0&&channelConfig.getFecParityShardCount()!=0){
-                convIndex+= Fec.fecHeaderSizePlus2;
+            if (channelConfig.getFecDataShardCount() != 0 && channelConfig.getFecParityShardCount() != 0) {
+                convIndex += Fec.fecHeaderSizePlus2;
             }
             channelManager = new ConvChannelManager(convIndex);
-        }else{
+        } else {
             channelManager = new ClientAddressChannelManager();
         }
         int cpuNum = Runtime.getRuntime().availableProcessors();
@@ -57,7 +60,7 @@ public class KcpClient {
             @Override
             protected void initChannel(NioDatagramChannel ch) {
                 ChannelPipeline cp = ch.pipeline();
-                if(channelConfig.isCrc32Check()){
+                if (channelConfig.isCrc32Check()) {
                     Crc32Encode crc32Encode = new Crc32Encode();
                     Crc32Decode crc32Decode = new Crc32Decode();
                     cp.addLast(crc32Encode);
@@ -70,12 +73,12 @@ public class KcpClient {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
-    public void init(DisruptorExecutorPool disruptorExecutorPool,ChannelConfig channelConfig) {
+    public void init(DisruptorExecutorPool disruptorExecutorPool, ChannelConfig channelConfig) {
         this.disruptorExecutorPool = disruptorExecutorPool;
         init(channelConfig);
     }
 
-    public void init(int workSize,ChannelConfig channelConfig) {
+    public void init(int workSize, ChannelConfig channelConfig) {
         this.disruptorExecutorPool = new DisruptorExecutorPool();
         for (int i = 0; i < workSize; i++) {
             disruptorExecutorPool.createDisruptorProcessor("disruptorExecutorPool" + i);
@@ -83,8 +86,9 @@ public class KcpClient {
         init(channelConfig);
     }
 
-    public Ukcp connect(InetSocketAddress localAddress,InetSocketAddress remoteAddress, ChannelConfig channelConfig, KcpListener kcpListener) {
-        if(localAddress==null){
+    public Ukcp connect(InetSocketAddress localAddress, InetSocketAddress remoteAddress, ChannelConfig channelConfig,
+                        KcpListener kcpListener) {
+        if (localAddress == null) {
             localAddress = new InetSocketAddress(0);
         }
 
@@ -102,17 +106,17 @@ public class KcpClient {
             reedSolomon = ReedSolomon.create(channelConfig.getFecDataShardCount(), channelConfig.getFecParityShardCount());
         }
 
-        Ukcp ukcp = new Ukcp(kcpOutput, kcpListener, disruptorSingleExecutor, reedSolomon,channelConfig,channelManager);
+        Ukcp ukcp = new Ukcp(kcpOutput, kcpListener, disruptorSingleExecutor, reedSolomon, channelConfig, channelManager);
         ukcp.user(user);
 
         disruptorSingleExecutor.execute(() -> {
             try {
                 ukcp.getKcpListener().onConnected(ukcp);
-            }catch (Throwable throwable){
-                ukcp.getKcpListener().handleException(throwable,ukcp);
+            } catch (Throwable throwable) {
+                ukcp.getKcpListener().handleException(throwable, ukcp);
             }
         });
-        channelManager.New(localAddress,ukcp);
+        channelManager.New(localAddress, ukcp);
 
         ScheduleTask scheduleTask = new ScheduleTask(disruptorSingleExecutor, ukcp);
         DisruptorExecutorPool.scheduleHashedWheel(scheduleTask, ukcp.getInterval());
@@ -121,7 +125,7 @@ public class KcpClient {
     }
 
     public Ukcp connect(InetSocketAddress remoteAddress, ChannelConfig channelConfig, KcpListener kcpListener) {
-        return connect(null,remoteAddress,channelConfig,kcpListener);
+        return connect(null, remoteAddress, channelConfig, kcpListener);
     }
 
 

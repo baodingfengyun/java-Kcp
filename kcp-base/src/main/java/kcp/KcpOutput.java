@@ -7,6 +7,11 @@ import io.netty.buffer.ByteBuf;
  */
 public interface KcpOutput {
 
+    /**
+     * 写数据
+     * @param data
+     * @param kcp
+     */
     void out(ByteBuf data, Kcp kcp);
 
 }

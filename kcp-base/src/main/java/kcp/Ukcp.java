@@ -28,7 +28,10 @@ public class Ukcp{
 
     public static final int KCP_TAG=1;
 
-    public static final int  UNORDERED_UNRELIABLE_PROTOCOL = 1, ORDERLY_RELIABLE_PROTOCOL = 0, TCP_PROTOCOL = 2 ,UNORDERED_RELIABLE_PROTOCOL=3;
+    public static final int  UNORDERED_UNRELIABLE_PROTOCOL = 1,
+                             ORDERLY_RELIABLE_PROTOCOL = 0,
+                             TCP_PROTOCOL = 2,
+                             UNORDERED_RELIABLE_PROTOCOL=3;
 
     private final Kcp kcp;
 
@@ -64,7 +67,8 @@ public class Ukcp{
      *
      * @param output output for kcp
      */
-    public Ukcp(KcpOutput output, KcpListener kcpListener, IMessageExecutor iMessageExecutor,ReedSolomon reedSolomon,ChannelConfig channelConfig,IChannelManager channelManager) {
+    public Ukcp(KcpOutput output, KcpListener kcpListener, IMessageExecutor iMessageExecutor,ReedSolomon reedSolomon,
+                ChannelConfig channelConfig,IChannelManager channelManager) {
         this.channelConfig = channelConfig;
         this.kcp = new Kcp(channelConfig.getConv(), output);
         this.active = true;

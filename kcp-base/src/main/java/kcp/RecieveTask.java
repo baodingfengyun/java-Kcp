@@ -8,6 +8,8 @@ import threadPool.task.ITask;
 import java.util.Queue;
 
 /**
+ * 数据接收任务
+ *
  * Created by JinMiao
  * 2018/9/11.
  */

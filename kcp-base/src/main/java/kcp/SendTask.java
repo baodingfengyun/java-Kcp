@@ -8,6 +8,8 @@ import threadPool.task.ITask;
 import java.io.IOException;
 
 /**
+ * 数据发送任务
+ *
  * Created by JinMiao
  * 2018/9/11.
  */

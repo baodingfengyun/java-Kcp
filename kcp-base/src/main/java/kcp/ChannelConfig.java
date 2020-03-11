@@ -32,17 +32,21 @@ public class ChannelConfig {
     private boolean autoSetConv = false;
     //增加ack包回复成功率 填 /8/16/32
     private int ackMaskSize = 0;
-    /**使用conv确定一个channel 还是使用 socketAddress确定一个channel**/
-    private boolean useConvChannel=false;
-    /**在协议的第一字节标记为kcp对象 用于与非可靠udp整合**/
+    /**
+     * 使用conv确定一个channel 还是使用 socketAddress确定一个channel
+     **/
+    private boolean useConvChannel = false;
+    /**
+     * 在协议的第一字节标记为kcp对象 用于与非可靠udp整合
+     **/
     public boolean KcpTag;
 
 
-    public void nodelay(boolean nodelay, int interval, int resend, boolean nc){
+    public void nodelay(boolean nodelay, int interval, int resend, boolean nc) {
         this.nodelay = nodelay;
         this.interval = interval;
         this.fastresend = resend;
-        this.nocwnd=nc;
+        this.nocwnd = nc;
     }
 
 
